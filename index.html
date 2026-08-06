@@ -312,6 +312,179 @@
   }
 
   ::-webkit-scrollbar{ display:none; }
+
+  /* ============================================================
+     ENGLISH QUIZ SYSTEM — popup styling
+     ============================================================ */
+  #quizScreen{
+    z-index:30;
+    background:rgba(2,2,10,0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: fadeIn .3s ease;
+  }
+  .quiz-panel{
+    position:relative;
+    max-width:560px;
+    width:92vw;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:30px 34px;
+    background:linear-gradient(160deg, rgba(18,14,42,0.9), rgba(8,6,22,0.92));
+    border:1.5px solid rgba(255,214,90,0.4);
+    box-shadow:0 0 50px rgba(255,214,90,0.18), 0 0 90px rgba(185,107,255,0.18), inset 0 0 30px rgba(58,214,255,0.05);
+    animation: quizPopIn .4s cubic-bezier(.2,.9,.3,1.3);
+  }
+  @keyframes quizPopIn{
+    from{ opacity:0; transform:scale(0.85) translateY(14px); }
+    to{ opacity:1; transform:scale(1) translateY(0); }
+  }
+  .quiz-header{
+    text-align:center;
+    font-size:1.25rem;
+    font-weight:800;
+    letter-spacing:2px;
+    color:#ffd65a;
+    text-shadow:0 0 18px rgba(255,214,90,0.55);
+    margin-bottom:14px;
+    animation: quizHeaderGlow 1.6s ease-in-out infinite;
+  }
+  @keyframes quizHeaderGlow{
+    0%,100%{ filter:drop-shadow(0 0 6px rgba(255,214,90,0.4)); }
+    50%{ filter:drop-shadow(0 0 16px rgba(255,214,90,0.85)); }
+  }
+  .quiz-player{
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--text-dim);
+    letter-spacing:1px;
+    margin-bottom:18px;
+  }
+  .quiz-player span{
+    color:var(--text);
+    font-weight:800;
+    font-size:1rem;
+    letter-spacing:1px;
+  }
+  .quiz-question{
+    text-align:center;
+    font-size:1.25rem;
+    line-height:1.5;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:24px;
+    padding:16px 18px;
+    border-radius:14px;
+    background:rgba(58,214,255,0.06);
+    border:1px solid rgba(58,214,255,0.2);
+  }
+  .quiz-choices{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .quiz-choice-btn{
+    position:relative;
+    padding:14px 16px;
+    font-size:0.95rem;
+    font-weight:600;
+    text-align:left;
+    color:var(--text);
+    background:rgba(255,255,255,0.04);
+    border:1.5px solid var(--panel-border);
+    border-radius:12px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:transform .15s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+  }
+  .quiz-choice-btn::before{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform:translateX(-120%);
+    transition:transform .5s ease;
+  }
+  .quiz-choice-btn:hover:not(:disabled){
+    transform:translateY(-2px) scale(1.02);
+    box-shadow:0 0 18px rgba(58,214,255,0.4);
+    background:linear-gradient(135deg, rgba(58,214,255,0.2), rgba(185,107,255,0.2));
+    border-color:var(--neon-blue);
+  }
+  .quiz-choice-btn:hover:not(:disabled)::before{ transform:translateX(120%); }
+  .quiz-choice-btn:active:not(:disabled){ transform:translateY(0) scale(0.98); }
+  .quiz-choice-btn:disabled{ cursor:default; opacity:0.55; }
+
+  .quiz-timer{
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--text-dim);
+    letter-spacing:1px;
+  }
+  .quiz-timer span{
+    color:#ffd65a;
+    font-weight:800;
+    font-size:1rem;
+  }
+  .quiz-timer-bar{
+    margin-top:10px;
+    width:100%;
+    height:8px;
+    border-radius:6px;
+    background:rgba(255,255,255,0.08);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.12);
+  }
+  .quiz-timer-fill{
+    height:100%;
+    width:100%;
+    border-radius:6px;
+    background:linear-gradient(90deg, var(--neon-blue), #ffd65a);
+    box-shadow:0 0 12px rgba(255,214,90,0.6);
+    transition:width 1s linear;
+  }
+
+  .quiz-result{
+    text-align:center;
+    animation: quizResultIn .4s cubic-bezier(.2,.9,.3,1.3);
+  }
+  @keyframes quizResultIn{
+    from{ opacity:0; transform:scale(0.7); }
+    to{ opacity:1; transform:scale(1); }
+  }
+  .quiz-result-icon{
+    font-size:3.6rem;
+    margin-bottom:6px;
+    animation: quizIconPulse .6s ease-in-out infinite alternate;
+  }
+  @keyframes quizIconPulse{
+    from{ transform:scale(1); }
+    to{ transform:scale(1.12); }
+  }
+  .quiz-result-icon.save{ filter:drop-shadow(0 0 20px rgba(58,255,160,0.8)); }
+  .quiz-result-icon.wrong{ filter:drop-shadow(0 0 20px rgba(255,80,90,0.8)); }
+  .quiz-result-title{
+    font-size:1.7rem;
+    font-weight:800;
+    letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  #quizResult .quiz-result-icon.save ~ .quiz-result-title{ color:#3affa0; text-shadow:0 0 16px rgba(58,255,160,0.6); }
+  #quizResult .quiz-result-icon.wrong ~ .quiz-result-title{ color:#ff5c6a; text-shadow:0 0 16px rgba(255,92,106,0.6); }
+  .quiz-result-sub{
+    font-size:1rem;
+    color:var(--text);
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .quiz-result-explanation{
+    font-size:0.85rem;
+    color:var(--text-dim);
+    line-height:1.5;
+    max-width:440px;
+    margin:0 auto;
+    padding:0 6px;
+  }
 </style>
 </head>
 <body>
@@ -417,6 +590,35 @@
     </div>
   </div>
 
+  <!-- ENGLISH QUIZ CHALLENGE -->
+  <div id="quizScreen" class="overlay hidden">
+    <div class="panel quiz-panel">
+      <div class="quiz-header">⚠ ENGLISH CHALLENGE</div>
+      <div class="quiz-player">Player: <span id="quizPlayerName">Aji</span></div>
+
+      <div id="quizBody">
+        <div class="quiz-question" id="quizQuestion">Question text here</div>
+        <div class="quiz-choices" id="quizChoices">
+          <button class="quiz-choice-btn" data-index="0">A. Choice</button>
+          <button class="quiz-choice-btn" data-index="1">B. Choice</button>
+          <button class="quiz-choice-btn" data-index="2">C. Choice</button>
+          <button class="quiz-choice-btn" data-index="3">D. Choice</button>
+        </div>
+        <div class="quiz-timer">
+          Time Remaining: <span id="quizTimeLeft">15</span> seconds
+          <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="quizTimerFill"></div></div>
+        </div>
+      </div>
+
+      <div class="quiz-result hidden" id="quizResult">
+        <div class="quiz-result-icon" id="quizResultIcon">🛡</div>
+        <div class="quiz-result-title" id="quizResultTitle">SAVE POINT!</div>
+        <div class="quiz-result-sub" id="quizResultSub">Correct! Great Job!</div>
+        <div class="quiz-result-explanation" id="quizResultExplanation"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -446,7 +648,7 @@
 
   // ---------------- Game State ----------------
   const WINNING_SCORE = 10;
-  const STATE = { MENU:'menu', HOWTO:'howto', PLAYING:'playing', PAUSED:'paused', WINNER:'winner' };
+  const STATE = { MENU:'menu', HOWTO:'howto', PLAYING:'playing', PAUSED:'paused', WINNER:'winner', QUIZ:'quiz' };
   let state = STATE.MENU;
 
   const keys = {};
@@ -782,11 +984,11 @@
       handlePaddleHit(p2, -1);
     }
 
-    // scoring
+    // scoring — a miss no longer scores immediately; it triggers an English Challenge
     if (b.x + b.r < 0){
-      score('p2');
+      handleMiss('p1'); // p1 failed to return the ball
     } else if (b.x - b.r > W){
-      score('p1');
+      handleMiss('p2'); // p2 failed to return the ball
     }
   }
 
@@ -830,6 +1032,312 @@
   function updateHud(){
     document.getElementById('p1Score').textContent = game.p1.score;
     document.getElementById('p2Score').textContent = game.p2.score;
+  }
+
+  // ============================================================
+  // ENGLISH QUIZ SYSTEM
+  // Grade 7 Junior High School — Easy to Medium
+  // 20 questions: Grammar(4), Vocabulary(4), Tenses(4),
+  // Daily Conversation(4), Reading Comprehension(4)
+  // ============================================================
+  const QUESTIONS = [
+    // ---- Grammar (4) ----
+    {
+      category:'Grammar',
+      question:"He ____ to school every day.",
+      choices:["go","goes","going","gone"],
+      correctIndex:1,
+      explanation:"Because 'He' is third-person singular, the verb must use 'goes'."
+    },
+    {
+      category:'Grammar',
+      question:"There ____ two books on the table.",
+      choices:["is","am","are","be"],
+      correctIndex:2,
+      explanation:"'Two books' is plural, so the sentence needs the plural verb 'are'."
+    },
+    {
+      category:'Grammar',
+      question:"This is ____ interesting movie.",
+      choices:["a","an","the","some"],
+      correctIndex:1,
+      explanation:"'Interesting' starts with a vowel sound, so the article 'an' is used."
+    },
+    {
+      category:'Grammar',
+      question:"My sister and I ____ good friends.",
+      choices:["is","are","was","being"],
+      correctIndex:1,
+      explanation:"'My sister and I' is a plural subject, so it needs 'are'."
+    },
+
+    // ---- Vocabulary (4) ----
+    {
+      category:'Vocabulary',
+      question:"The opposite of 'happy' is ____.",
+      choices:["glad","sad","angry","tired"],
+      correctIndex:1,
+      explanation:"'Sad' means the opposite feeling of 'happy'."
+    },
+    {
+      category:'Vocabulary',
+      question:"A place where you borrow books is called a ____.",
+      choices:["hospital","library","market","garage"],
+      correctIndex:1,
+      explanation:"A 'library' is a place where people borrow and read books."
+    },
+    {
+      category:'Vocabulary',
+      question:"Something used to cut paper is called ____.",
+      choices:["scissors","hammer","spoon","broom"],
+      correctIndex:0,
+      explanation:"'Scissors' is the tool used for cutting paper or cloth."
+    },
+    {
+      category:'Vocabulary',
+      question:"The word 'enormous' means ____.",
+      choices:["very small","very large","very fast","very quiet"],
+      correctIndex:1,
+      explanation:"'Enormous' is a synonym for 'very large' or 'huge'."
+    },
+
+    // ---- Tenses (4) ----
+    {
+      category:'Tenses',
+      question:"Yesterday, I ____ my homework.",
+      choices:["finish","finished","finishing","finishes"],
+      correctIndex:1,
+      explanation:"'Yesterday' signals the simple past tense, so we use 'finished'."
+    },
+    {
+      category:'Tenses',
+      question:"She ____ watching TV right now.",
+      choices:["is","was","were","are"],
+      correctIndex:0,
+      explanation:"'Right now' signals present continuous tense, so 'is' is used with 'watching'."
+    },
+    {
+      category:'Tenses',
+      question:"They ____ to Bali next week.",
+      choices:["travel","travelled","will travel","travelling"],
+      correctIndex:2,
+      explanation:"'Next week' signals the future, so 'will travel' is correct."
+    },
+    {
+      category:'Tenses',
+      question:"By the time we arrived, the movie ____ already started.",
+      choices:["has","have","had","having"],
+      correctIndex:2,
+      explanation:"An action finished before another past action needs the past perfect 'had'."
+    },
+
+    // ---- Daily Conversation (4) ----
+    {
+      category:'Daily Conversation',
+      question:"A: \"How are you?\" B: \"____, thank you.\"",
+      choices:["I am ten","I am fine","I am here","I am late"],
+      correctIndex:1,
+      explanation:"'I am fine' is the common reply to greetings like 'How are you?'."
+    },
+    {
+      category:'Daily Conversation',
+      question:"A: \"What time is it?\" B: \"____ seven o'clock.\"",
+      choices:["It is","There is","This is","He is"],
+      correctIndex:0,
+      explanation:"We use 'It is' when telling the time in English."
+    },
+    {
+      category:'Daily Conversation',
+      question:"A: \"Can I borrow your pen?\" B: \"____, here you are.\"",
+      choices:["No problem","Sure","Never mind","Not really"],
+      correctIndex:1,
+      explanation:"'Sure' is a polite way to agree to someone's request."
+    },
+    {
+      category:'Daily Conversation',
+      question:"A: \"Nice to meet you.\" B: \"____.\"",
+      choices:["Nice to meet you too","See you later","Excuse me","Good night"],
+      correctIndex:0,
+      explanation:"'Nice to meet you too' is the polite reply when meeting someone new."
+    },
+
+    // ---- Reading Comprehension (4) ----
+    {
+      category:'Reading Comprehension',
+      question:"\"Rina wakes up at 6 a.m. and goes jogging.\" What does Rina do at 6 a.m.?",
+      choices:["She sleeps","She goes jogging","She cooks dinner","She reads a book"],
+      correctIndex:1,
+      explanation:"The sentence directly states that Rina goes jogging at 6 a.m."
+    },
+    {
+      category:'Reading Comprehension',
+      question:"\"Budi likes mangoes, but he does not like durian.\" What fruit does Budi dislike?",
+      choices:["Mango","Durian","Apple","Banana"],
+      correctIndex:1,
+      explanation:"The sentence says Budi 'does not like durian', so durian is his dislike."
+    },
+    {
+      category:'Reading Comprehension',
+      question:"\"The weather was rainy, so Sinta brought an umbrella.\" Why did Sinta bring an umbrella?",
+      choices:["It was sunny","It was rainy","It was cold","It was windy"],
+      correctIndex:1,
+      explanation:"The sentence states the weather 'was rainy', which is why she brought an umbrella."
+    },
+    {
+      category:'Reading Comprehension',
+      question:"\"After school, Andi does his homework before playing football.\" What does Andi do first?",
+      choices:["Play football","Do his homework","Watch TV","Take a nap"],
+      correctIndex:1,
+      explanation:"The word 'before' shows Andi does his homework first, then plays football."
+    }
+  ];
+
+  const quizEls = {
+    screen: document.getElementById('quizScreen'),
+    playerName: document.getElementById('quizPlayerName'),
+    body: document.getElementById('quizBody'),
+    question: document.getElementById('quizQuestion'),
+    choices: document.getElementById('quizChoices'),
+    choiceBtns: Array.prototype.slice.call(document.querySelectorAll('.quiz-choice-btn')),
+    timerWrap: document.querySelector('.quiz-timer'),
+    timeLeft: document.getElementById('quizTimeLeft'),
+    timerFill: document.getElementById('quizTimerFill'),
+    result: document.getElementById('quizResult'),
+    resultIcon: document.getElementById('quizResultIcon'),
+    resultTitle: document.getElementById('quizResultTitle'),
+    resultSub: document.getElementById('quizResultSub'),
+    resultExplanation: document.getElementById('quizResultExplanation')
+  };
+
+  const QUIZ_TIME = 15;
+  let quizState = {
+    active:false,
+    misser:null,      // 'p1' or 'p2' — the player who missed and must answer
+    question:null,
+    timeLeft:QUIZ_TIME,
+    timerHandle:null,
+    resolved:false
+  };
+  let lastQuestionIndex = -1;
+
+  function pickQuestion(){
+    if (QUESTIONS.length <= 1) return QUESTIONS[0];
+    let idx;
+    do { idx = Math.floor(Math.random() * QUESTIONS.length); } while (idx === lastQuestionIndex);
+    lastQuestionIndex = idx;
+    return QUESTIONS[idx];
+  }
+
+  function handleMiss(misser){
+    // Freeze the match, darken the screen, and challenge the player who missed.
+    state = STATE.QUIZ;
+    spawnImpactParticles(game.ball.x, game.ball.y, '#ff5c6a', 20);
+    game.shake = 10;
+
+    const q = pickQuestion();
+    quizState.active = true;
+    quizState.misser = misser;
+    quizState.question = q;
+    quizState.timeLeft = QUIZ_TIME;
+    quizState.resolved = false;
+
+    const displayName = misser === 'p1'
+      ? document.getElementById('p1Name').textContent
+      : document.getElementById('p2Name').textContent;
+    quizEls.playerName.textContent = displayName;
+    quizEls.question.textContent = q.question;
+
+    const letters = ['A','B','C','D'];
+    quizEls.choiceBtns.forEach((btn, i)=>{
+      btn.textContent = letters[i] + '. ' + q.choices[i];
+      btn.disabled = false;
+      btn.classList.remove('correct','wrong');
+    });
+
+    quizEls.result.classList.add('hidden');
+    quizEls.body.classList.remove('hidden');
+    updateQuizTimerUI();
+
+    showOnly(quizScreen);
+
+    clearInterval(quizState.timerHandle);
+    quizState.timerHandle = setInterval(()=>{
+      quizState.timeLeft--;
+      updateQuizTimerUI();
+      if (quizState.timeLeft <= 0){
+        clearInterval(quizState.timerHandle);
+        resolveQuiz(-1); // time's up -> treated as wrong answer
+      }
+    }, 1000);
+  }
+
+  function updateQuizTimerUI(){
+    const t = Math.max(0, quizState.timeLeft);
+    quizEls.timeLeft.textContent = t;
+    quizEls.timerFill.style.width = (t / QUIZ_TIME * 100) + '%';
+  }
+
+  quizEls.choiceBtns.forEach((btn)=>{
+    btn.addEventListener('click', ()=>{
+      if (!quizState.active || quizState.resolved) return;
+      resolveQuiz(parseInt(btn.dataset.index, 10));
+    });
+  });
+
+  function resolveQuiz(chosenIndex){
+    if (quizState.resolved) return;
+    quizState.resolved = true;
+    clearInterval(quizState.timerHandle);
+
+    const q = quizState.question;
+    const isCorrect = chosenIndex === q.correctIndex;
+    const letters = ['A','B','C','D'];
+
+    quizEls.body.classList.add('hidden');
+    quizEls.result.classList.remove('hidden');
+
+    let waitTime;
+    if (isCorrect){
+      quizEls.resultIcon.textContent = '🛡';
+      quizEls.resultIcon.className = 'quiz-result-icon save';
+      quizEls.resultTitle.textContent = 'SAVE POINT!';
+      quizEls.resultTitle.style.color = '#3affa0';
+      quizEls.resultTitle.style.textShadow = '0 0 16px rgba(58,255,160,0.6)';
+      quizEls.resultSub.textContent = 'Correct! Great Job!';
+      quizEls.resultExplanation.textContent = '';
+      waitTime = 1500;
+    } else {
+      quizEls.resultIcon.textContent = '❌';
+      quizEls.resultIcon.className = 'quiz-result-icon wrong';
+      quizEls.resultTitle.textContent = 'Wrong!';
+      quizEls.resultTitle.style.color = '#ff5c6a';
+      quizEls.resultTitle.style.textShadow = '0 0 16px rgba(255,92,106,0.6)';
+      quizEls.resultSub.textContent = `Correct Answer: ${letters[q.correctIndex]}. ${q.choices[q.correctIndex]}`;
+      quizEls.resultExplanation.textContent = q.explanation;
+      waitTime = 2000;
+
+      // Opponent of the player who missed receives the point.
+      const opponent = quizState.misser === 'p1' ? 'p2' : 'p1';
+      if (opponent === 'p1') game.p1.score++; else game.p2.score++;
+      updateHud();
+      spawnImpactParticles(game.ball.x, game.ball.y, '#ff5cf0', 26);
+
+      if (game.p1.score >= WINNING_SCORE || game.p2.score >= WINNING_SCORE){
+        setTimeout(()=>{
+          quizState.active = false;
+          showWinner();
+        }, waitTime);
+        return;
+      }
+    }
+
+    const misser = quizState.misser;
+    setTimeout(()=>{
+      quizState.active = false;
+      showOnly(null);
+      state = STATE.PLAYING;
+      serveBall(misser === 'p1' ? 1 : -1);
+    }, waitTime);
   }
 
   // ---------------- Drawing ----------------
@@ -1091,12 +1599,13 @@
   const howtoScreen = document.getElementById('howtoScreen');
   const pauseScreen = document.getElementById('pauseScreen');
   const winnerScreen = document.getElementById('winnerScreen');
+  const quizScreen = document.getElementById('quizScreen');
   const hud = document.getElementById('hud');
   const topRightControls = document.getElementById('topRightControls');
   const inGameHint = document.getElementById('inGameHint');
 
   function showOnly(el){
-    [menuScreen, howtoScreen, pauseScreen, winnerScreen].forEach(s => s.classList.add('hidden'));
+    [menuScreen, howtoScreen, pauseScreen, winnerScreen, quizScreen].forEach(s => s.classList.add('hidden'));
     if (el) el.classList.remove('hidden');
   }
 
