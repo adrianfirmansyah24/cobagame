@@ -485,6 +485,62 @@
     margin:0 auto;
     padding:0 6px;
   }
+
+  /* ---------- Bot "thinking" state inside quiz popup ---------- */
+  .quiz-bot-thinking{
+    text-align:center;
+    padding:20px 0 6px;
+  }
+  .quiz-bot-spinner{
+    width:52px; height:52px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    border:4px solid rgba(58,214,255,0.18);
+    border-top-color:var(--neon-blue);
+    border-right-color:var(--neon-purple);
+    animation: botSpin .9s linear infinite;
+    box-shadow:0 0 18px rgba(58,214,255,0.35);
+  }
+  @keyframes botSpin{ to{ transform:rotate(360deg); } }
+  .quiz-bot-text{
+    font-size:1rem;
+    color:var(--text-dim);
+    letter-spacing:0.5px;
+  }
+
+  /* ---------- Mode select & name input screens ---------- */
+  .name-input-group{
+    text-align:left;
+    margin-bottom:16px;
+  }
+  .name-input-label{
+    display:block;
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .name-input{
+    width:100%;
+    padding:13px 16px;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--text);
+    background:rgba(255,255,255,0.04);
+    border:1.5px solid var(--panel-border);
+    border-radius:10px;
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .name-input::placeholder{ color:var(--text-dim); opacity:0.6; }
+  .name-input:focus{
+    border-color:var(--neon-blue);
+    background:rgba(58,214,255,0.06);
+    box-shadow:0 0 14px rgba(58,214,255,0.3);
+  }
+  #modeScreen .menu-buttons,
+  #nameScreen .menu-buttons{ margin-top:8px; }
 </style>
 </head>
 <body>
@@ -565,6 +621,39 @@
     </div>
   </div>
 
+  <!-- MODE SELECT -->
+  <div id="modeScreen" class="overlay hidden">
+    <div class="panel" style="text-align:center;">
+      <div class="status-title" style="font-size:1.8rem;">Choose Mode</div>
+      <div class="status-sub">How do you want to play?</div>
+      <div class="menu-buttons">
+        <button class="neon-btn primary" id="modeBotBtn">🤖 VS Bot (1 Player)</button>
+        <button class="neon-btn primary" id="modePvpBtn">🧑‍🤝‍🧑 Multiplayer (2 Player)</button>
+        <button class="neon-btn secondary" id="modeBackBtn">← Back to Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAME INPUT -->
+  <div id="nameScreen" class="overlay hidden">
+    <div class="panel" style="text-align:center;">
+      <div class="status-title" style="font-size:1.8rem;" id="nameScreenTitle">Enter Player Names</div>
+      <div class="status-sub" id="nameScreenSub">This name will show on the scoreboard</div>
+      <div class="name-input-group">
+        <label class="name-input-label" for="p1NameInput">Player 1 &nbsp;(W / S)</label>
+        <input type="text" id="p1NameInput" class="name-input" maxlength="12" placeholder="Aji" autocomplete="off">
+      </div>
+      <div class="name-input-group" id="p2NameGroup">
+        <label class="name-input-label" for="p2NameInput">Player 2 &nbsp;(↑ / ↓)</label>
+        <input type="text" id="p2NameInput" class="name-input" maxlength="12" placeholder="Panji" autocomplete="off">
+      </div>
+      <div class="menu-buttons">
+        <button class="neon-btn primary" id="nameConfirmBtn">▶ Start Match</button>
+        <button class="neon-btn secondary" id="nameBackBtn">← Back</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PAUSE -->
   <div id="pauseScreen" class="overlay hidden">
     <div class="panel" style="text-align:center;">
@@ -610,6 +699,11 @@
         </div>
       </div>
 
+      <div class="quiz-bot-thinking hidden" id="quizBotThinking">
+        <div class="quiz-bot-spinner"></div>
+        <div class="quiz-bot-text" id="quizBotText">CPU is answering...</div>
+      </div>
+
       <div class="quiz-result hidden" id="quizResult">
         <div class="quiz-result-icon" id="quizResultIcon">🛡</div>
         <div class="quiz-result-title" id="quizResultTitle">SAVE POINT!</div>
@@ -648,11 +742,19 @@
 
   // ---------------- Game State ----------------
   const WINNING_SCORE = 10;
-  const STATE = { MENU:'menu', HOWTO:'howto', PLAYING:'playing', PAUSED:'paused', WINNER:'winner', QUIZ:'quiz' };
+  const STATE = { MENU:'menu', HOWTO:'howto', MODE:'mode', NAME:'name', PLAYING:'playing', PAUSED:'paused', WINNER:'winner', QUIZ:'quiz' };
   let state = STATE.MENU;
+
+  // ---------------- Game Mode & Player Names ----------------
+  let gameMode = 'pvp';           // 'bot' (1 player vs CPU) or 'pvp' (2 player multiplayer)
+  let playerOneName = 'Aji';
+  let playerTwoName = 'Panji';
+  function isBotSide(side){ return gameMode === 'bot' && side === 'p2'; }
 
   const keys = {};
   window.addEventListener('keydown', (e)=>{
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return; // let the user type freely
     keys[e.code] = true;
     if (e.code === 'Escape'){
       if (state === STATE.PLAYING) pauseGame();
@@ -660,7 +762,11 @@
     }
     if (['ArrowUp','ArrowDown','Space'].includes(e.code)) e.preventDefault();
   });
-  window.addEventListener('keyup', (e)=>{ keys[e.code] = false; });
+  window.addEventListener('keyup', (e)=>{
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+    keys[e.code] = false;
+  });
 
   // ---------------- Touch Input — drag anywhere on your half (multi-touch safe) ----------------
   // Left half of the canvas = Player 1 (Aji), right half = Player 2 (Panji).
@@ -923,10 +1029,35 @@
     const p1 = game.p1, p2 = game.p2;
 
     updateOnePaddle(p1, dragState.p1, keys['KeyW'], keys['KeyS'], dt);
-    updateOnePaddle(p2, dragState.p2, keys['ArrowUp'], keys['ArrowDown'], dt);
+
+    if (gameMode === 'bot'){
+      updateBotPaddle(p2, dt);
+    } else {
+      updateOnePaddle(p2, dragState.p2, keys['ArrowUp'], keys['ArrowDown'], dt);
+    }
 
     p1.glow = Math.max(0, p1.glow - dt*2);
     p2.glow = Math.max(0, p2.glow - dt*2);
+  }
+
+  // Simple, beatable CPU paddle: tracks the ball only while it's approaching,
+  // drifts back to center otherwise, and moves at slightly less than max
+  // player speed so a human can still out-play it.
+  function updateBotPaddle(paddle, dt){
+    const b = game.ball;
+    const targetCenter = (b.vx > 0) ? b.y : H/2;
+    const diff = targetCenter - (paddle.y + paddle.h/2);
+    const deadZone = paddle.h * 0.12;
+
+    let dir = 0;
+    if (diff > deadZone) dir = 1;
+    else if (diff < -deadZone) dir = -1;
+
+    const accel = 14;
+    const botSpeed = paddle.speed * 0.85;
+    paddle.vy += (dir*botSpeed - paddle.vy) * Math.min(1, accel*dt);
+    paddle.y += paddle.vy*dt;
+    paddle.y = clamp(paddle.y, 0, H - paddle.h);
   }
 
   function updateOnePaddle(paddle, drag, upKey, downKey, dt){
@@ -1202,6 +1333,8 @@
     timerWrap: document.querySelector('.quiz-timer'),
     timeLeft: document.getElementById('quizTimeLeft'),
     timerFill: document.getElementById('quizTimerFill'),
+    botThinking: document.getElementById('quizBotThinking'),
+    botText: document.getElementById('quizBotText'),
     result: document.getElementById('quizResult'),
     resultIcon: document.getElementById('quizResultIcon'),
     resultTitle: document.getElementById('quizResultTitle'),
@@ -1228,6 +1361,8 @@
     return QUESTIONS[idx];
   }
 
+  const BOT_CORRECT_CHANCE = 0.55; // CPU "knowledge" level — tune for difficulty
+
   function handleMiss(misser){
     // Freeze the match, darken the screen, and challenge the player who missed.
     state = STATE.QUIZ;
@@ -1241,11 +1376,38 @@
     quizState.timeLeft = QUIZ_TIME;
     quizState.resolved = false;
 
-    const displayName = misser === 'p1'
-      ? document.getElementById('p1Name').textContent
-      : document.getElementById('p2Name').textContent;
+    const displayName = misser === 'p1' ? playerOneName : playerTwoName;
     quizEls.playerName.textContent = displayName;
     quizEls.question.textContent = q.question;
+
+    showOnly(quizScreen);
+
+    if (isBotSide(misser)){
+      // CPU "answers" on its own — no interactive choices or countdown shown.
+      quizEls.body.classList.add('hidden');
+      quizEls.result.classList.add('hidden');
+      quizEls.botThinking.classList.remove('hidden');
+      quizEls.botText.textContent = `${playerTwoName} is answering...`;
+
+      const thinkTime = 1400 + Math.random()*1200;
+      setTimeout(()=>{
+        if (!quizState.active || quizState.resolved) return;
+        const botCorrect = Math.random() < BOT_CORRECT_CHANCE;
+        let chosenIndex;
+        if (botCorrect){
+          chosenIndex = q.correctIndex;
+        } else {
+          do { chosenIndex = Math.floor(Math.random()*4); } while (chosenIndex === q.correctIndex);
+        }
+        resolveQuiz(chosenIndex);
+      }, thinkTime);
+      return;
+    }
+
+    // Human player — interactive choices + countdown timer.
+    quizEls.botThinking.classList.add('hidden');
+    quizEls.body.classList.remove('hidden');
+    quizEls.result.classList.add('hidden');
 
     const letters = ['A','B','C','D'];
     quizEls.choiceBtns.forEach((btn, i)=>{
@@ -1253,12 +1415,7 @@
       btn.disabled = false;
       btn.classList.remove('correct','wrong');
     });
-
-    quizEls.result.classList.add('hidden');
-    quizEls.body.classList.remove('hidden');
     updateQuizTimerUI();
-
-    showOnly(quizScreen);
 
     clearInterval(quizState.timerHandle);
     quizState.timerHandle = setInterval(()=>{
@@ -1294,6 +1451,7 @@
     const letters = ['A','B','C','D'];
 
     quizEls.body.classList.add('hidden');
+    quizEls.botThinking.classList.add('hidden');
     quizEls.result.classList.remove('hidden');
 
     let waitTime;
@@ -1597,6 +1755,8 @@
   // ---------------- UI / State Transitions ----------------
   const menuScreen = document.getElementById('menuScreen');
   const howtoScreen = document.getElementById('howtoScreen');
+  const modeScreen = document.getElementById('modeScreen');
+  const nameScreen = document.getElementById('nameScreen');
   const pauseScreen = document.getElementById('pauseScreen');
   const winnerScreen = document.getElementById('winnerScreen');
   const quizScreen = document.getElementById('quizScreen');
@@ -1605,8 +1765,55 @@
   const inGameHint = document.getElementById('inGameHint');
 
   function showOnly(el){
-    [menuScreen, howtoScreen, pauseScreen, winnerScreen, quizScreen].forEach(s => s.classList.add('hidden'));
+    [menuScreen, howtoScreen, modeScreen, nameScreen, pauseScreen, winnerScreen, quizScreen].forEach(s => s.classList.add('hidden'));
     if (el) el.classList.remove('hidden');
+  }
+
+  function goToModeScreen(){
+    state = STATE.MODE;
+    showOnly(modeScreen);
+  }
+
+  function goToNameScreen(mode){
+    gameMode = mode;
+    state = STATE.NAME;
+    showOnly(nameScreen);
+
+    const p1Input = document.getElementById('p1NameInput');
+    const p2Input = document.getElementById('p2NameInput');
+    const p2Group = document.getElementById('p2NameGroup');
+    const title = document.getElementById('nameScreenTitle');
+    const sub = document.getElementById('nameScreenSub');
+
+    p1Input.value = '';
+    p2Input.value = '';
+
+    if (gameMode === 'bot'){
+      p2Group.classList.add('hidden');
+      title.textContent = 'Enter Your Name';
+      sub.textContent = "You'll play against the CPU";
+    } else {
+      p2Group.classList.remove('hidden');
+      title.textContent = 'Enter Player Names';
+      sub.textContent = 'These names show on the scoreboard';
+    }
+    setTimeout(()=> p1Input.focus(), 50);
+  }
+
+  function confirmNamesAndStart(){
+    const p1Input = document.getElementById('p1NameInput').value.trim();
+    playerOneName = (p1Input || 'Aji').slice(0, 12);
+
+    if (gameMode === 'bot'){
+      playerTwoName = 'CPU';
+    } else {
+      const p2Input = document.getElementById('p2NameInput').value.trim();
+      playerTwoName = (p2Input || 'Panji').slice(0, 12);
+    }
+
+    document.getElementById('p1Name').textContent = playerOneName.toUpperCase();
+    document.getElementById('p2Name').textContent = playerTwoName.toUpperCase();
+    startGame();
   }
 
   function goToMenu(){
@@ -1651,7 +1858,8 @@
   function showWinner(){
     state = STATE.WINNER;
     const p1win = game.p1.score > game.p2.score;
-    document.getElementById('winnerTitle').textContent = p1win ? 'Aji Wins!' : 'Panji Wins!';
+    const winnerName = p1win ? playerOneName : playerTwoName;
+    document.getElementById('winnerTitle').textContent = `${winnerName} Wins!`;
     document.getElementById('winnerSub').textContent = `${game.p1.score} — ${game.p2.score}`;
     document.getElementById('winnerTitle').style.background =
       p1win ? 'linear-gradient(90deg,#3ad6ff,#8fe8ff)' : 'linear-gradient(90deg,#b96bff,#ff5cf0)';
@@ -1660,9 +1868,25 @@
     showOnly(winnerScreen);
   }
 
-  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('startBtn').addEventListener('click', goToModeScreen);
   document.getElementById('howtoBtn').addEventListener('click', ()=>{ state = STATE.HOWTO; showOnly(howtoScreen); });
   document.getElementById('backFromHowtoBtn').addEventListener('click', goToMenu);
+
+  document.getElementById('modeBotBtn').addEventListener('click', ()=> goToNameScreen('bot'));
+  document.getElementById('modePvpBtn').addEventListener('click', ()=> goToNameScreen('pvp'));
+  document.getElementById('modeBackBtn').addEventListener('click', goToMenu);
+
+  document.getElementById('nameConfirmBtn').addEventListener('click', confirmNamesAndStart);
+  document.getElementById('nameBackBtn').addEventListener('click', goToModeScreen);
+  document.getElementById('p1NameInput').addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter'){
+      if (gameMode === 'bot') confirmNamesAndStart();
+      else document.getElementById('p2NameInput').focus();
+    }
+  });
+  document.getElementById('p2NameInput').addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter') confirmNamesAndStart();
+  });
 
   document.getElementById('pauseBtn').addEventListener('click', ()=>{
     if (state === STATE.PLAYING) pauseGame(); else if (state === STATE.PAUSED) resumeGame();
