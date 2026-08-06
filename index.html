@@ -225,65 +225,6 @@
     z-index:10; pointer-events:none;
   }
 
-  /* ---------- Touch Controls ---------- */
-  #touchControls{
-    position:absolute; inset:0;
-    z-index:12;
-    pointer-events:none;
-  }
-  .touch-zone{
-    position:absolute;
-    bottom:18px;
-    display:flex; flex-direction:column;
-    gap:16px;
-    pointer-events:none;
-  }
-  .touch-zone.left{ left:16px; align-items:flex-start; }
-  .touch-zone.right{ right:16px; align-items:flex-end; }
-  .touch-btn{
-    width:min(84px, 15vw);
-    height:min(84px, 15vw);
-    min-width:58px; min-height:58px;
-    border-radius:20px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.8rem;
-    color:var(--text);
-    background:rgba(255,255,255,0.06);
-    border:1.5px solid rgba(58,214,255,0.4);
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
-    box-shadow:0 0 0 rgba(58,214,255,0), inset 0 0 14px rgba(255,255,255,0.05);
-    pointer-events:auto;
-    touch-action:none;
-    -webkit-tap-highlight-color:transparent;
-    transition:transform .12s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
-    user-select:none;
-  }
-  .touch-btn.p2{ border-color:rgba(185,107,255,0.45); }
-  .touch-btn.pressed{
-    transform:scale(0.88);
-    background:rgba(58,214,255,0.22);
-    border-color:var(--neon-blue);
-    box-shadow:0 0 26px rgba(58,214,255,0.55), 0 0 50px rgba(58,214,255,0.25), inset 0 0 18px rgba(255,255,255,0.12);
-  }
-  .touch-btn.p2.pressed{
-    background:rgba(185,107,255,0.22);
-    border-color:var(--neon-purple);
-    box-shadow:0 0 26px rgba(185,107,255,0.55), 0 0 50px rgba(185,107,255,0.25), inset 0 0 18px rgba(255,255,255,0.12);
-  }
-  .touch-label{
-    position:absolute;
-    text-align:center;
-    font-size:0.62rem;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--text-dim);
-    top:-20px; left:0; right:0;
-    pointer-events:none;
-  }
-  .touch-zone.left .touch-label{ text-align:left; }
-  .touch-zone.right .touch-label{ text-align:right; }
-
   /* ---------- Portrait Warning ---------- */
   #portraitWarning{
     position:fixed; inset:0;
@@ -292,7 +233,9 @@
     align-items:center; justify-content:center;
     flex-direction:column;
     text-align:center;
-    background:radial-gradient(circle at 50% 40%, rgba(20,10,45,0.9), rgba(2,2,8,0.98) 75%);
+    background:radial-gradient(circle at 50% 40%, rgba(20,10,45,0.92), rgba(2,2,8,0.99) 75%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding:30px;
   }
   #portraitWarning.show{ display:flex; }
@@ -311,6 +254,13 @@
     color:var(--text);
     max-width:340px;
     line-height:1.5;
+  }
+  .rotate-title{
+    font-size:1.3rem;
+    font-weight:800;
+    margin-bottom:10px;
+    background:linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
 
   /* ---------- HUD refinements ---------- */
@@ -331,11 +281,37 @@
     font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; opacity:0.7;
   }
 
-  ::-webkit-scrollbar{ display:none; }
-
-  @media (max-width:820px){
-    .touch-btn{ font-size:1.5rem; }
+  /* ---------- Touch drag hint (fades out automatically) ---------- */
+  #dragHint{
+    position:absolute; inset:0;
+    z-index:8;
+    pointer-events:none;
+    display:flex;
+    opacity:0;
+    transition:opacity .6s ease;
   }
+  #dragHint.show{ opacity:1; }
+  #dragHint.fade{ opacity:0; }
+  .drag-hint-side{
+    flex:1;
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0.35);
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    flex-direction:column;
+    gap:6px;
+  }
+  .drag-hint-side .drag-icon{
+    font-size:1.6rem;
+    animation: dragBob 1.6s ease-in-out infinite;
+  }
+  @keyframes dragBob{
+    0%,100%{ transform:translateY(-6px); opacity:0.5; }
+    50%{ transform:translateY(6px); opacity:0.9; }
+  }
+
+  ::-webkit-scrollbar{ display:none; }
 </style>
 </head>
 <body>
@@ -365,30 +341,25 @@
     <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
   </div>
 
-  <div class="footer-hint hidden" id="inGameHint">W / S &nbsp;•&nbsp; ↑ / ↓ &nbsp;•&nbsp; ESC to pause</div>
+  <div class="footer-hint hidden" id="inGameHint">W / S &nbsp;•&nbsp; ↑ / ↓ &nbsp;•&nbsp; Drag left / right side to move &nbsp;•&nbsp; ESC to pause</div>
 
-  <!-- TOUCH CONTROLS -->
-  <div id="touchControls" class="hidden">
-    <div class="touch-zone left">
-      <div style="position:relative;">
-        <div class="touch-label">AJI</div>
-        <button class="touch-btn" id="p1UpBtn" aria-label="Player 1 Up">▲</button>
-      </div>
-      <button class="touch-btn" id="p1DownBtn" aria-label="Player 1 Down">▼</button>
+  <!-- TOUCH DRAG HINT (fades automatically, no persistent UI) -->
+  <div id="dragHint">
+    <div class="drag-hint-side">
+      <div class="drag-icon">↕</div>
+      <div>Drag to move — Aji</div>
     </div>
-    <div class="touch-zone right">
-      <div style="position:relative;">
-        <div class="touch-label">PANJI</div>
-        <button class="touch-btn p2" id="p2UpBtn" aria-label="Player 2 Up">▲</button>
-      </div>
-      <button class="touch-btn p2" id="p2DownBtn" aria-label="Player 2 Down">▼</button>
+    <div class="drag-hint-side">
+      <div class="drag-icon">↕</div>
+      <div>Drag to move — Panji</div>
     </div>
   </div>
 
   <!-- PORTRAIT WARNING -->
   <div id="portraitWarning">
     <div class="rotate-icon">📱</div>
-    <div class="rotate-text">Please rotate your device to landscape for the best experience.</div>
+    <div class="rotate-title">Rotate your device</div>
+    <div class="rotate-text">This game is designed for landscape mode.</div>
   </div>
 
   <!-- MAIN MENU -->
@@ -410,7 +381,7 @@
       <ul class="howto-list">
         <li><span class="key">W</span><span class="key">S</span><span class="howto-desc">Aji — move paddle up / down</span></li>
         <li><span class="key">↑</span><span class="key">↓</span><span class="howto-desc">Panji — move paddle up / down</span></li>
-        <li><span class="key">▲▼</span><span class="howto-desc">Touch buttons work too — bottom-left for Aji, bottom-right for Panji</span></li>
+        <li><span class="key">👆</span><span class="howto-desc">Touch &amp; drag anywhere on your half of the screen</span></li>
         <li><span class="key">ESC</span><span class="howto-desc">Pause / Resume the match</span></li>
       </ul>
       <p style="color:var(--text-dim); font-size:0.88rem; line-height:1.5; margin-bottom:24px;">
@@ -489,42 +460,75 @@
   });
   window.addEventListener('keyup', (e)=>{ keys[e.code] = false; });
 
-  // ---------------- Touch Input (multi-touch safe) ----------------
-  const touch = { p1Up:false, p1Down:false, p2Up:false, p2Down:false };
+  // ---------------- Touch Input — drag anywhere on your half (multi-touch safe) ----------------
+  // Left half of the canvas = Player 1 (Aji), right half = Player 2 (Panji).
+  // Each side tracks at most one active pointer; pointer capture keeps events
+  // routed to the canvas even if the finger slides outside it while dragging.
+  const dragState = {
+    p1: { pointerId: null, y: null },
+    p2: { pointerId: null, y: null }
+  };
 
-  function bindTouchBtn(el, keyName){
-    if (!el) return;
-    const activePointers = new Set();
-
-    const setPressed = (pressed)=>{
-      touch[keyName] = pressed;
-      el.classList.toggle('pressed', pressed);
+  function canvasRelativePoint(e){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    const scaleY = H / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: Math.max(0, Math.min(H, (e.clientY - rect.top) * scaleY))
     };
-
-    el.addEventListener('pointerdown', (e)=>{
-      e.preventDefault();
-      activePointers.add(e.pointerId);
-      try{ el.setPointerCapture(e.pointerId); }catch(err){}
-      setPressed(true);
-    }, {passive:false});
-
-    const release = (e)=>{
-      activePointers.delete(e.pointerId);
-      if (activePointers.size === 0) setPressed(false);
-    };
-    el.addEventListener('pointerup', release);
-    el.addEventListener('pointercancel', release);
-    el.addEventListener('pointerleave', release);
-
-    // prevent context menu / long-press artifacts
-    el.addEventListener('contextmenu', (e)=> e.preventDefault());
   }
 
-  function initTouchControls(){
-    bindTouchBtn(document.getElementById('p1UpBtn'), 'p1Up');
-    bindTouchBtn(document.getElementById('p1DownBtn'), 'p1Down');
-    bindTouchBtn(document.getElementById('p2UpBtn'), 'p2Up');
-    bindTouchBtn(document.getElementById('p2DownBtn'), 'p2Down');
+  canvas.style.touchAction = 'none';
+
+  canvas.addEventListener('pointerdown', (e)=>{
+    if (state !== STATE.PLAYING) return;
+    const p = canvasRelativePoint(e);
+    const side = p.x < W/2 ? 'p1' : 'p2';
+    if (dragState[side].pointerId === null){
+      dragState[side].pointerId = e.pointerId;
+      dragState[side].y = p.y;
+      try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+      hideDragHint();
+    }
+  }, {passive:true});
+
+  canvas.addEventListener('pointermove', (e)=>{
+    if (dragState.p1.pointerId === e.pointerId){
+      dragState.p1.y = canvasRelativePoint(e).y;
+    } else if (dragState.p2.pointerId === e.pointerId){
+      dragState.p2.y = canvasRelativePoint(e).y;
+    }
+  }, {passive:true});
+
+  function releaseDragPointer(e){
+    if (dragState.p1.pointerId === e.pointerId){
+      dragState.p1.pointerId = null; dragState.p1.y = null;
+    }
+    if (dragState.p2.pointerId === e.pointerId){
+      dragState.p2.pointerId = null; dragState.p2.y = null;
+    }
+  }
+  canvas.addEventListener('pointerup', releaseDragPointer);
+  canvas.addEventListener('pointercancel', releaseDragPointer);
+  canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+
+  // Brief onboarding hint shown only the first couple of times a match starts,
+  // fades out on first touch or after a few seconds — keeps the UI out of the way.
+  let dragHintShown = 0;
+  const dragHintEl = document.getElementById('dragHint');
+  let dragHintTimer = null;
+  function maybeShowDragHint(){
+    if (!('ontouchstart' in window) || dragHintShown >= 2) return;
+    dragHintShown++;
+    dragHintEl.classList.remove('fade');
+    dragHintEl.classList.add('show');
+    clearTimeout(dragHintTimer);
+    dragHintTimer = setTimeout(hideDragHint, 3000);
+  }
+  function hideDragHint(){
+    dragHintEl.classList.remove('show');
+    dragHintEl.classList.add('fade');
   }
 
   // ---------------- Orientation / Portrait Guard ----------------
@@ -674,26 +678,34 @@
   function updatePaddles(dt){
     const p1 = game.p1, p2 = game.p2;
 
-    let p1Dir = 0;
-    if (keys['KeyW'] || touch.p1Up) p1Dir -= 1;
-    if (keys['KeyS'] || touch.p1Down) p1Dir += 1;
-    let p2Dir = 0;
-    if (keys['ArrowUp'] || touch.p2Up) p2Dir -= 1;
-    if (keys['ArrowDown'] || touch.p2Down) p2Dir += 1;
-
-    // smooth velocity based movement
-    const accel = 16;
-    p1.vy += (p1Dir*p1.speed - p1.vy) * Math.min(1, accel*dt);
-    p2.vy += (p2Dir*p2.speed - p2.vy) * Math.min(1, accel*dt);
-
-    p1.y += p1.vy*dt;
-    p2.y += p2.vy*dt;
-
-    p1.y = Math.max(0, Math.min(H - p1.h, p1.y));
-    p2.y = Math.max(0, Math.min(H - p2.h, p2.y));
+    updateOnePaddle(p1, dragState.p1, keys['KeyW'], keys['KeyS'], dt);
+    updateOnePaddle(p2, dragState.p2, keys['ArrowUp'], keys['ArrowDown'], dt);
 
     p1.glow = Math.max(0, p1.glow - dt*2);
     p2.glow = Math.max(0, p2.glow - dt*2);
+  }
+
+  function updateOnePaddle(paddle, drag, upKey, downKey, dt){
+    if (drag.pointerId !== null && drag.y !== null){
+      // Finger-drag mode: paddle center smoothly chases the touch Y position.
+      const desiredY = clamp(drag.y - paddle.h/2, 0, H - paddle.h);
+      const followRate = 1 - Math.pow(0.0025, dt); // frame-rate independent smoothing
+      paddle.y += (desiredY - paddle.y) * Math.min(1, followRate);
+      paddle.vy = 0;
+    } else {
+      // Keyboard mode: velocity-based smooth acceleration.
+      let dir = 0;
+      if (upKey) dir -= 1;
+      if (downKey) dir += 1;
+      const accel = 16;
+      paddle.vy += (dir*paddle.speed - paddle.vy) * Math.min(1, accel*dt);
+      paddle.y += paddle.vy*dt;
+    }
+    paddle.y = clamp(paddle.y, 0, H - paddle.h);
+  }
+
+  function clamp(v, min, max){
+    return Math.max(min, Math.min(max, v));
   }
 
   // ---------------- Ball / Physics ----------------
@@ -976,7 +988,6 @@
   const hud = document.getElementById('hud');
   const topRightControls = document.getElementById('topRightControls');
   const inGameHint = document.getElementById('inGameHint');
-  const touchControls = document.getElementById('touchControls');
 
   function showOnly(el){
     [menuScreen, howtoScreen, pauseScreen, winnerScreen].forEach(s => s.classList.add('hidden'));
@@ -989,8 +1000,9 @@
     hud.classList.add('hidden');
     topRightControls.classList.add('hidden');
     inGameHint.classList.add('hidden');
-    touchControls.classList.add('hidden');
-    touch.p1Up = touch.p1Down = touch.p2Up = touch.p2Down = false;
+    dragState.p1.pointerId = null; dragState.p1.y = null;
+    dragState.p2.pointerId = null; dragState.p2.y = null;
+    hideDragHint();
   }
 
   function startGame(){
@@ -1002,8 +1014,10 @@
     hud.classList.remove('hidden');
     topRightControls.classList.remove('hidden');
     inGameHint.classList.remove('hidden');
-    touchControls.classList.remove('hidden');
+    dragState.p1.pointerId = null; dragState.p1.y = null;
+    dragState.p2.pointerId = null; dragState.p2.y = null;
     checkOrientation();
+    maybeShowDragHint();
   }
 
   function pauseGame(){
@@ -1068,7 +1082,6 @@
   });
 
   // Initial screen
-  initTouchControls();
   checkOrientation();
   goToMenu();
 
