@@ -568,7 +568,10 @@
       trail: [],
       particles: [],
       shake: 0,
-      lastScorer: null
+      lastScorer: null,
+      countdown: null,
+      pendingVx: 0,
+      pendingVy: 0
     };
   }
 
@@ -587,6 +590,45 @@
   }
 
   let game = freshGame();
+
+  // ---------------- Serve / Countdown ----------------
+  // Freezes the ball at center, plays a 3-2-1-GO! countdown, then launches it.
+  // Paddles remain fully controllable throughout.
+  function serveBall(dir){
+    const ball = makeBall(dir);
+    game.pendingVx = ball.vx;
+    game.pendingVy = ball.vy;
+    ball.vx = 0;
+    ball.vy = 0;
+    game.ball = ball;
+    game.trail = [];
+    game.countdown = {
+      active: true,
+      steps: ['3', '2', '1', 'GO!'],
+      index: 0,
+      t: 0,
+      stepDuration: 0.72,
+      goDuration: 0.5
+    };
+  }
+
+  function updateCountdown(dt){
+    const c = game.countdown;
+    if (!c || !c.active) return;
+    c.t += dt;
+    const isLastStep = c.index === c.steps.length - 1;
+    const dur = isLastStep ? c.goDuration : c.stepDuration;
+    if (c.t >= dur){
+      c.t = 0;
+      c.index++;
+      if (c.index >= c.steps.length){
+        c.active = false;
+        game.ball.vx = game.pendingVx;
+        game.ball.vy = game.pendingVy;
+        return;
+      }
+    }
+  }
 
   // ---------------- Background particles (menu + gameplay ambience) ----------------
   let bgParticles = [];
@@ -782,8 +824,7 @@
       showWinner();
       return;
     }
-    game.ball = makeBall(who === 'p1' ? 1 : -1);
-    game.trail = [];
+    serveBall(who === 'p1' ? 1 : -1);
   }
 
   function updateHud(){
@@ -913,7 +954,11 @@
 
     if (state === STATE.PLAYING){
       updatePaddles(dt);
-      updateBall(dt);
+      if (game.countdown && game.countdown.active){
+        updateCountdown(dt);
+      } else {
+        updateBall(dt);
+      }
       updateParticles(dt);
       if (game.shake > 0) game.shake = Math.max(0, game.shake - dt*40);
     }
@@ -937,6 +982,67 @@
       drawPaddle(game.p1, '#3ad6ff');
       drawPaddle(game.p2, '#b96bff');
       drawBall();
+    }
+    ctx.restore();
+
+    if (state === STATE.PLAYING && game.countdown && game.countdown.active){
+      drawCountdown();
+    }
+  }
+
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+  function drawCountdown(){
+    const c = game.countdown;
+    const step = c.steps[c.index];
+    const isLastStep = c.index === c.steps.length - 1;
+    const dur = isLastStep ? c.goDuration : c.stepDuration;
+    const progress = Math.min(1, c.t / dur);
+
+    const inEnd = 0.3, outStart = 0.72;
+    let scale, alpha;
+    if (progress < inEnd){
+      const p = progress / inEnd;
+      scale = 1.55 - 0.55 * easeOutCubic(p);
+      alpha = p;
+    } else if (progress > outStart){
+      const p = (progress - outStart) / (1 - outStart);
+      scale = 1.0 + 0.12 * p;
+      alpha = 1 - p;
+    } else {
+      scale = 1.0;
+      alpha = 1;
+    }
+    alpha = Math.max(0, Math.min(1, alpha));
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(W/2, H/2);
+    ctx.scale(scale, scale);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const isGo = step === 'GO!';
+    const fontSize = Math.min(W, H) * (isGo ? 0.17 : 0.24);
+    ctx.font = `800 ${fontSize}px 'Segoe UI', Arial, sans-serif`;
+
+    if (isGo){
+      ctx.shadowColor = '#3affa0';
+      ctx.shadowBlur = 45;
+      ctx.fillStyle = '#3affa0';
+      ctx.fillText(step, 0, 0);
+      // extra glow pass for a punchier look
+      ctx.shadowBlur = 70;
+      ctx.globalAlpha = alpha * 0.5;
+      ctx.fillText(step, 0, 0);
+    } else {
+      ctx.shadowColor = '#3ad6ff';
+      ctx.shadowBlur = 32;
+      const grad = ctx.createLinearGradient(-fontSize/2, 0, fontSize/2, 0);
+      grad.addColorStop(0, '#3ad6ff');
+      grad.addColorStop(1, '#b96bff');
+      ctx.fillStyle = grad;
+      ctx.fillText(step, 0, 0);
     }
     ctx.restore();
   }
@@ -1018,6 +1124,7 @@
     dragState.p2.pointerId = null; dragState.p2.y = null;
     checkOrientation();
     maybeShowDragHint();
+    serveBall();
   }
 
   function pauseGame(){
