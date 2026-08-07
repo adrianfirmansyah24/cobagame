@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>English Tennis Arena</title>
 <style>
   :root{
@@ -15,6 +15,22 @@
     --panel-border:rgba(180,120,255,0.35);
     --text:#eaf2ff;
     --text-dim:#8d8fb8;
+
+    /* ---- Design system tokens (spacing / radius / shadow) ---- */
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:10px;
+    --space-1:clamp(6px, 1vw, 10px);
+    --space-2:clamp(10px, 1.6vw, 16px);
+    --space-3:clamp(16px, 2.6vw, 26px);
+    --space-4:clamp(22px, 3.6vw, 36px);
+    --shadow-panel:0 0 40px rgba(80,40,160,0.35), inset 0 0 30px rgba(58,214,255,0.04);
+    --shadow-glow-blue:0 0 22px rgba(58,214,255,0.45), 0 0 40px rgba(185,107,255,0.25);
+    --control-h:clamp(46px, 6.2vh, 58px);
+    --safe-t:env(safe-area-inset-top, 0px);
+    --safe-b:env(safe-area-inset-bottom, 0px);
+    --safe-l:env(safe-area-inset-left, 0px);
+    --safe-r:env(safe-area-inset-right, 0px);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{
@@ -52,17 +68,18 @@
     z-index:20;
     background:radial-gradient(circle at 50% 30%, rgba(20,10,45,0.55), rgba(2,2,8,0.92) 70%);
     backdrop-filter: blur(2px);
+    padding:calc(var(--space-3) + var(--safe-t)) calc(var(--space-3) + var(--safe-r)) calc(var(--space-3) + var(--safe-b)) calc(var(--space-3) + var(--safe-l));
     animation: fadeIn .35s ease;
   }
   .hidden{ display:none !important; }
-  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
   .title-wrap{
     text-align:center;
-    margin-bottom:34px;
+    margin-bottom:var(--space-4);
   }
   .game-title{
-    font-size:clamp(2.2rem, 6vw, 4.2rem);
+    font-size:clamp(2rem, 6vw, 4.2rem);
     font-weight:800;
     letter-spacing:2px;
     background:linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
@@ -77,30 +94,34 @@
     50%{ filter:drop-shadow(0 0 26px rgba(185,107,255,0.75)); }
   }
   .game-subtitle{
-    margin-top:8px;
+    margin-top:var(--space-1);
     color:var(--text-dim);
     letter-spacing:6px;
-    font-size:0.8rem;
+    font-size:clamp(0.65rem, 1.4vw, 0.8rem);
     text-transform:uppercase;
   }
 
   .menu-buttons{
-    display:flex; flex-direction:column; gap:16px;
-    width:min(320px, 80vw);
+    display:flex; flex-direction:column; gap:var(--space-2);
+    width:min(320px, 82vw);
+    margin-left:auto; margin-right:auto;
   }
   .neon-btn{
     position:relative;
-    padding:16px 28px;
-    font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center;
+    width:100%;
+    height:var(--control-h);
+    padding:0 var(--space-3);
+    font-size:clamp(0.9rem, 2.2vw, 1.05rem);
     font-weight:700;
     letter-spacing:1px;
     color:var(--text);
     background:linear-gradient(135deg, rgba(58,214,255,0.14), rgba(185,107,255,0.14));
     border:1.5px solid var(--panel-border);
-    border-radius:12px;
+    border-radius:var(--radius-md);
     cursor:pointer;
     overflow:hidden;
-    transition:transform .15s ease, box-shadow .25s ease, background .25s ease;
+    transition:transform .15s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease, background .25s ease, border-color .25s ease;
     text-transform:uppercase;
   }
   .neon-btn::before{
@@ -112,12 +133,12 @@
   }
   .neon-btn:hover{
     transform:translateY(-2px) scale(1.02);
-    box-shadow:0 0 22px rgba(58,214,255,0.45), 0 0 40px rgba(185,107,255,0.25);
+    box-shadow:var(--shadow-glow-blue);
     background:linear-gradient(135deg, rgba(58,214,255,0.28), rgba(185,107,255,0.28));
     border-color:var(--neon-blue);
   }
   .neon-btn:hover::before{ transform:translateX(120%); }
-  .neon-btn:active{ transform:translateY(0) scale(0.98); }
+  .neon-btn:active{ transform:translateY(0) scale(0.96); }
   .neon-btn.secondary{
     background:rgba(255,255,255,0.03);
     border-color:rgba(255,255,255,0.15);
@@ -127,27 +148,36 @@
     border-color:var(--neon-blue);
     box-shadow:0 0 18px rgba(58,214,255,0.3);
   }
+  .neon-btn:focus-visible{
+    outline:2px solid var(--neon-blue);
+    outline-offset:3px;
+  }
 
   .panel{
     background:rgba(10,8,30,0.85);
     border:1.5px solid var(--panel-border);
-    border-radius:18px;
-    padding:34px 40px;
-    box-shadow:0 0 40px rgba(80,40,160,0.35), inset 0 0 30px rgba(58,214,255,0.04);
+    border-radius:var(--radius-lg);
+    padding:var(--space-4) clamp(20px, 5vw, 40px);
+    box-shadow:var(--shadow-panel);
     max-width:520px;
-    width:90vw;
-    max-height:88vh;
+    width:min(520px, 92vw);
+    max-height:min(88vh, 720px);
     overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:auto;
   }
+  .panel > *{ width:100%; }
 
   /* How to play */
   .howto-list{
     list-style:none;
-    margin:18px 0 26px;
-    display:flex; flex-direction:column; gap:14px;
+    margin:var(--space-2) 0 var(--space-3);
+    display:flex; flex-direction:column; gap:var(--space-2);
   }
   .howto-list li{
-    display:flex; align-items:center; gap:14px;
+    display:flex; align-items:center; gap:var(--space-2);
     font-size:0.95rem;
     color:var(--text);
   }
@@ -165,32 +195,34 @@
 
   /* Pause / Winner text */
   .status-title{
-    font-size:2.4rem; font-weight:800; margin-bottom:6px;
+    font-size:clamp(1.7rem, 4.6vw, 2.4rem); font-weight:800; margin-bottom:6px;
     text-align:center;
     background:linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .status-sub{ text-align:center; color:var(--text-dim); margin-bottom:26px; font-size:1rem;}
+  .status-sub{ text-align:center; color:var(--text-dim); margin-bottom:var(--space-4); font-size:1rem;}
 
   /* HUD */
   #hud{
     position:absolute;
-    top:18px; left:0; right:0;
+    top:calc(var(--space-2) + var(--safe-t)); left:0; right:0;
     display:flex; align-items:center; justify-content:center;
-    gap:40px;
+    gap:clamp(20px, 5vw, 40px);
     z-index:10;
     pointer-events:none;
     font-weight:800;
   }
   .score-block{
     display:flex; flex-direction:column; align-items:center;
-    min-width:110px;
+    min-width:90px;
   }
   .score-name{
     font-size:0.72rem; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase;
+    max-width:clamp(90px, 22vw, 160px);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .score-value{
-    font-size:2.6rem;
+    font-size:clamp(1.8rem, 5vw, 2.6rem);
     line-height:1;
     text-shadow:0 0 18px currentColor;
   }
@@ -199,12 +231,12 @@
   .vs-divider{ color:var(--text-dim); font-size:1.2rem; font-weight:400;}
 
   #topRightControls{
-    position:absolute; top:16px; right:16px;
-    display:flex; gap:10px;
+    position:absolute; top:calc(var(--space-2) + var(--safe-t)); right:calc(var(--space-2) + var(--safe-r));
+    display:flex; gap:var(--space-1);
     z-index:15;
   }
   .icon-btn{
-    width:42px; height:42px;
+    width:clamp(38px, 5.2vw, 42px); height:clamp(38px, 5.2vw, 42px);
     border-radius:10px;
     background:rgba(20,16,45,0.7);
     border:1.5px solid var(--panel-border);
@@ -212,19 +244,23 @@
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
     font-size:1.1rem;
-    transition:all .2s ease;
+    transition:all .2s cubic-bezier(.2,.8,.3,1.3);
   }
   .icon-btn:hover{
     border-color:var(--neon-blue);
     box-shadow:0 0 14px rgba(58,214,255,0.4);
     transform:translateY(-1px);
   }
+  .icon-btn:active{ transform:translateY(0) scale(0.92); }
+  .icon-btn.is-off{ color:var(--text-dim); opacity:0.55; }
+  .icon-btn:focus-visible{ outline:2px solid var(--neon-blue); outline-offset:2px; }
 
   .footer-hint{
-    position:absolute; bottom:14px; left:0; right:0;
+    position:absolute; bottom:calc(var(--space-2) + var(--safe-b)); left:0; right:0;
     text-align:center; color:var(--text-dim);
-    font-size:0.75rem; letter-spacing:1px;
+    font-size:clamp(0.62rem, 1.6vw, 0.75rem); letter-spacing:1px;
     z-index:10; pointer-events:none;
+    padding:0 calc(var(--space-2) + var(--safe-l)) 0 calc(var(--space-2) + var(--safe-r));
   }
 
   /* ---------- Portrait Warning ---------- */
@@ -238,7 +274,7 @@
     background:radial-gradient(circle at 50% 40%, rgba(20,10,45,0.92), rgba(2,2,8,0.99) 75%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    padding:30px;
+    padding:var(--space-4);
   }
   #portraitWarning.show{ display:flex; }
   .rotate-icon{
@@ -328,10 +364,10 @@
   .quiz-panel{
     position:relative;
     max-width:560px;
-    width:92vw;
-    max-height:88vh;
+    width:min(560px, 92vw);
+    max-height:min(88vh, 720px);
     overflow-y:auto;
-    padding:30px 34px;
+    padding:var(--space-4) clamp(20px, 5vw, 34px);
     background:linear-gradient(160deg, rgba(18,14,42,0.9), rgba(8,6,22,0.92));
     border:1.5px solid rgba(255,214,90,0.4);
     box-shadow:0 0 50px rgba(255,214,90,0.18), 0 0 90px rgba(185,107,255,0.18), inset 0 0 30px rgba(58,214,255,0.05);
@@ -360,7 +396,7 @@
     font-size:0.85rem;
     color:var(--text-dim);
     letter-spacing:1px;
-    margin-bottom:18px;
+    margin-bottom:var(--space-3);
   }
   .quiz-player span{
     color:var(--text);
@@ -370,11 +406,11 @@
   }
   .quiz-question{
     text-align:center;
-    font-size:1.25rem;
+    font-size:clamp(1.05rem, 3vw, 1.25rem);
     line-height:1.5;
     font-weight:700;
     color:var(--text);
-    margin-bottom:24px;
+    margin-bottom:var(--space-3);
     padding:16px 18px;
     border-radius:14px;
     background:rgba(58,214,255,0.06);
@@ -384,7 +420,7 @@
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:12px;
-    margin-bottom:22px;
+    margin-bottom:var(--space-3);
   }
   .quiz-choice-btn{
     position:relative;
@@ -416,6 +452,7 @@
   .quiz-choice-btn:hover:not(:disabled)::before{ transform:translateX(120%); }
   .quiz-choice-btn:active:not(:disabled){ transform:translateY(0) scale(0.98); }
   .quiz-choice-btn:disabled{ cursor:default; opacity:0.55; }
+  .quiz-choice-btn:focus-visible{ outline:2px solid var(--neon-blue); outline-offset:2px; }
 
   .quiz-timer{
     text-align:center;
@@ -513,7 +550,7 @@
   /* ---------- Mode select & name input screens ---------- */
   .name-input-group{
     text-align:center;
-    margin:0 auto 18px;
+    margin:0 auto var(--space-2);
     max-width:380px;
     width:100%;
   }
@@ -528,14 +565,15 @@
   }
   .name-input{
     width:100%;
+    height:var(--control-h);
     text-align:center;
-    padding:13px 16px;
+    padding:0 16px;
     font-size:1rem;
     font-weight:600;
     color:var(--text);
     background:rgba(255,255,255,0.04);
     border:1.5px solid var(--panel-border);
-    border-radius:10px;
+    border-radius:var(--radius-sm);
     outline:none;
     transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
   }
@@ -546,7 +584,22 @@
     box-shadow:0 0 14px rgba(58,214,255,0.3);
   }
   #modeScreen .menu-buttons,
-  #nameScreen .menu-buttons{ margin-top:8px; }
+  #nameScreen .menu-buttons{ margin-top:var(--space-1); }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+    }
+  }
+
+  /* ---------- Small-screen refinements ---------- */
+  @media (max-height: 420px){
+    .panel{ padding:calc(var(--space-3)) clamp(16px,4vw,28px); }
+    .title-wrap{ margin-bottom:var(--space-2); }
+  }
 </style>
 </head>
 <body>
@@ -571,6 +624,8 @@
   </div>
 
   <div id="topRightControls" class="hidden">
+    <button class="icon-btn" id="soundBtn" title="Sound (mute/unmute)">🔊</button>
+    <button class="icon-btn" id="musicBtn" title="Music (mute/unmute)">🎵</button>
     <button class="icon-btn" id="pauseBtn" title="Pause (ESC)">❚❚</button>
     <button class="icon-btn" id="restartBtn" title="Restart">↻</button>
     <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
@@ -578,7 +633,7 @@
 
   <div class="footer-hint hidden" id="inGameHint">W / S &nbsp;•&nbsp; ↑ / ↓ &nbsp;•&nbsp; Drag left / right side to move &nbsp;•&nbsp; ESC to pause</div>
 
-  <!-- TOUCH DRAG HINT (fades automatically, no persistent UI) -->
+  <!-- TOUCH DRAG HINT (fades out automatically, no persistent UI) -->
   <div id="dragHint">
     <div class="drag-hint-side">
       <div class="drag-icon">↕</div>
@@ -744,6 +799,156 @@
 <script>
 (function(){
   "use strict";
+
+  // ============================================================
+  // AUDIO SYSTEM — Web Audio API only, no external assets.
+  // Generates soft synthesized tones for UI/game feedback.
+  // ============================================================
+  const AudioSys = (function(){
+    let ctx = null;
+    let masterGain = null;
+    let sfxGain = null;
+    let musicGain = null;
+    let soundOn = true;
+    let musicOn = true;
+    let musicTimer = null;
+    let musicStep = 0;
+
+    function ensureCtx(){
+      if (ctx) return ctx;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = 0.9;
+      masterGain.connect(ctx.destination);
+
+      sfxGain = ctx.createGain();
+      sfxGain.gain.value = 0.5;
+      sfxGain.connect(masterGain);
+
+      musicGain = ctx.createGain();
+      musicGain.gain.value = 0.12;
+      musicGain.connect(masterGain);
+      return ctx;
+    }
+
+    function resume(){
+      const c = ensureCtx();
+      if (c && c.state === 'suspended') c.resume().catch(()=>{});
+    }
+
+    // Simple soft tone with an envelope; kept quiet & pleasant.
+    function tone(opts){
+      if (!soundOn) return;
+      const c = ensureCtx();
+      if (!c) return;
+      const {
+        freq = 440, type = 'sine', dur = 0.18, delay = 0,
+        gainPeak = 0.5, endFreq = null, glideTime = null
+      } = opts;
+
+      const t0 = c.currentTime + delay;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t0);
+      if (endFreq !== null){
+        osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), t0 + (glideTime || dur));
+      }
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.001, gainPeak), t0 + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+      osc.connect(g);
+      g.connect(sfxGain);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.02);
+    }
+
+    function chord(freqs, opts){
+      freqs.forEach((f, i)=> tone(Object.assign({}, opts, {freq: f, delay: (opts.delay||0) + i*(opts.stagger||0)})));
+    }
+
+    const SFX = {
+      click(){ tone({freq:520, type:'triangle', dur:0.07, gainPeak:0.35}); },
+      hover(){ tone({freq:820, type:'sine', dur:0.05, gainPeak:0.14}); },
+      countdownTick(){ tone({freq:440, type:'sine', dur:0.12, gainPeak:0.3}); },
+      countdownGo(){ chord([523.25, 659.25, 783.99], {type:'triangle', dur:0.28, gainPeak:0.32, stagger:0.02}); },
+      paddleHit(intensity){
+        const f = 300 + Math.min(1, intensity||0) * 220;
+        tone({freq:f, type:'square', dur:0.09, gainPeak:0.28, endFreq:f*0.6, glideTime:0.09});
+      },
+      wallHit(){ tone({freq:700, type:'sine', dur:0.06, gainPeak:0.18}); },
+      score(forOpponent){
+        chord(forOpponent ? [392, 329.63] : [523.25, 659.25], {type:'triangle', dur:0.22, gainPeak:0.3, stagger:0.06});
+      },
+      victory(){
+        chord([523.25, 659.25, 783.99, 1046.5], {type:'triangle', dur:0.5, gainPeak:0.32, stagger:0.11});
+      },
+      defeat(){
+        chord([392, 329.63, 293.66], {type:'sawtooth', dur:0.5, gainPeak:0.2, stagger:0.13});
+      },
+      quizCorrect(){ chord([659.25, 987.77], {type:'triangle', dur:0.24, gainPeak:0.3, stagger:0.05}); },
+      quizWrong(){ tone({freq:220, type:'sawtooth', dur:0.3, gainPeak:0.22, endFreq:140, glideTime:0.3}); },
+      pause(){ tone({freq:392, type:'sine', dur:0.1, gainPeak:0.22}); }
+    };
+
+    // Very soft ambient arpeggio loop for "music" — minimal & non-intrusive.
+    const musicNotes = [261.63, 329.63, 392.0, 329.63, 293.66, 349.23, 392.0, 440.0];
+    function musicStepPlay(){
+      if (!musicOn || !soundOn){ return; }
+      const c = ensureCtx();
+      if (!c) return;
+      const f = musicNotes[musicStep % musicNotes.length];
+      const t0 = c.currentTime;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.4);
+      osc.connect(g); g.connect(musicGain);
+      osc.start(t0); osc.stop(t0 + 1.5);
+      musicStep++;
+    }
+    function startMusic(){
+      if (musicTimer) return;
+      resume();
+      musicTimer = setInterval(musicStepPlay, 900);
+    }
+    function stopMusic(){
+      if (musicTimer){ clearInterval(musicTimer); musicTimer = null; }
+    }
+
+    return {
+      resume,
+      sfx: SFX,
+      isSoundOn(){ return soundOn; },
+      isMusicOn(){ return musicOn; },
+      setSoundOn(v){ soundOn = v; },
+      setMusicOn(v){ musicOn = v; if (v) startMusic(); else stopMusic(); },
+      startMusic, stopMusic
+    };
+  })();
+
+  // Unlock audio context on first user gesture (autoplay policies).
+  function unlockAudioOnce(){
+    AudioSys.resume();
+    window.removeEventListener('pointerdown', unlockAudioOnce);
+    window.removeEventListener('keydown', unlockAudioOnce);
+  }
+  window.addEventListener('pointerdown', unlockAudioOnce, {once:true});
+  window.addEventListener('keydown', unlockAudioOnce, {once:true});
+
+  // Wire click/hover sfx onto every existing button without altering behavior.
+  function wireButtonSounds(){
+    document.querySelectorAll('.neon-btn, .icon-btn, .quiz-choice-btn').forEach((btn)=>{
+      btn.addEventListener('pointerenter', ()=> AudioSys.sfx.hover());
+      btn.addEventListener('click', ()=> AudioSys.sfx.click());
+    });
+  }
 
   // ---------------- Canvas Setup ----------------
   const canvas = document.getElementById('gameCanvas');
@@ -944,6 +1149,7 @@
       stepDuration: 0.72,
       goDuration: 0.5
     };
+    AudioSys.sfx.countdownTick();
   }
 
   function updateCountdown(dt){
@@ -960,6 +1166,11 @@
         game.ball.vx = game.pendingVx;
         game.ball.vy = game.pendingVy;
         return;
+      }
+      if (c.index < c.steps.length){
+        const isGoNow = c.index === c.steps.length - 1;
+        if (isGoNow) AudioSys.sfx.countdownGo();
+        else AudioSys.sfx.countdownTick();
       }
     }
   }
@@ -1124,9 +1335,11 @@
     if (b.y - b.r <= 0){
       b.y = b.r; b.vy *= -1;
       spawnImpactParticles(b.x, 0, '#3ad6ff', 8);
+      AudioSys.sfx.wallHit();
     } else if (b.y + b.r >= H){
       b.y = H - b.r; b.vy *= -1;
       spawnImpactParticles(b.x, H, '#3ad6ff', 8);
+      AudioSys.sfx.wallHit();
     }
 
     // paddle collision - p1
@@ -1170,6 +1383,7 @@
     game.shake = Math.min(18, intensity);
     const particleCount = Math.round(14 + (b.speedMult - 1) * 16);
     spawnImpactParticles(b.x, b.y, newDirSign===1 ? '#3ad6ff' : '#b96bff', particleCount);
+    AudioSys.sfx.paddleHit(b.speedMult - 1);
   }
 
   function score(who){
@@ -1490,6 +1704,7 @@
       quizEls.resultSub.textContent = 'Correct! Great Job!';
       quizEls.resultExplanation.textContent = '';
       waitTime = 1500;
+      AudioSys.sfx.quizCorrect();
     } else {
       quizEls.resultIcon.textContent = '❌';
       quizEls.resultIcon.className = 'quiz-result-icon wrong';
@@ -1499,12 +1714,14 @@
       quizEls.resultSub.textContent = `Correct Answer: ${letters[q.correctIndex]}. ${q.choices[q.correctIndex]}`;
       quizEls.resultExplanation.textContent = q.explanation;
       waitTime = 2000;
+      AudioSys.sfx.quizWrong();
 
       // Opponent of the player who missed receives the point.
       const opponent = quizState.misser === 'p1' ? 'p2' : 'p1';
       if (opponent === 'p1') game.p1.score++; else game.p2.score++;
       updateHud();
       spawnImpactParticles(game.ball.x, game.ball.y, '#ff5cf0', 26);
+      AudioSys.sfx.score(true);
 
       if (game.p1.score >= WINNING_SCORE || game.p2.score >= WINNING_SCORE){
         setTimeout(()=>{
@@ -1873,6 +2090,7 @@
     if (state !== STATE.PLAYING) return;
     state = STATE.PAUSED;
     showOnly(pauseScreen);
+    AudioSys.sfx.pause();
   }
 
   function resumeGame(){
@@ -1892,6 +2110,9 @@
     document.getElementById('winnerTitle').style.webkitBackgroundClip = 'text';
     document.getElementById('winnerTitle').style.backgroundClip = 'text';
     showOnly(winnerScreen);
+
+    // Victory/defeat cue keyed to Player 1's outcome (works for both PvP and Bot mode).
+    if (p1win) AudioSys.sfx.victory(); else AudioSys.sfx.defeat();
   }
 
   document.getElementById('startBtn').addEventListener('click', goToModeScreen);
@@ -1940,6 +2161,33 @@
     setTimeout(resizeCanvas, 50);
   });
 
+  // ---------------- Sound / Music toggle buttons ----------------
+  const soundBtn = document.getElementById('soundBtn');
+  const musicBtn = document.getElementById('musicBtn');
+
+  function refreshAudioButtons(){
+    const sOn = AudioSys.isSoundOn();
+    const mOn = AudioSys.isMusicOn();
+    soundBtn.textContent = sOn ? '🔊' : '🔇';
+    soundBtn.classList.toggle('is-off', !sOn);
+    soundBtn.title = sOn ? 'Sound: On (click to mute)' : 'Sound: Off (click to unmute)';
+    musicBtn.textContent = mOn ? '🎵' : '🎶';
+    musicBtn.classList.toggle('is-off', !mOn);
+    musicBtn.title = mOn ? 'Music: On (click to mute)' : 'Music: Off (click to unmute)';
+  }
+  soundBtn.addEventListener('click', ()=>{
+    AudioSys.resume();
+    AudioSys.setSoundOn(!AudioSys.isSoundOn());
+    if (!AudioSys.isSoundOn()) AudioSys.stopMusic(); else if (AudioSys.isMusicOn()) AudioSys.startMusic();
+    refreshAudioButtons();
+  });
+  musicBtn.addEventListener('click', ()=>{
+    AudioSys.resume();
+    AudioSys.setMusicOn(!AudioSys.isMusicOn());
+    refreshAudioButtons();
+  });
+  refreshAudioButtons();
+
   // recompute paddle/ball positions proportionally on resize while playing
   window.addEventListener('resize', ()=>{
     if (state === STATE.PLAYING || state === STATE.PAUSED){
@@ -1948,6 +2196,7 @@
   });
 
   // Initial screen
+  wireButtonSounds();
   checkOrientation();
   goToMenu();
 
